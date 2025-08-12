@@ -1,0 +1,21 @@
+# daemonset.yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: busybox-daemon
+  labels:
+    app: busybox
+spec:
+  selector:
+    matchLabels:
+      app: busybox
+  template:
+    metadata:
+      labels:
+        app: busybox
+    spec:
+      containers:
+      - name: busybox
+        image: busybox
+        command: [ "/bin/sh", "-c", "while true; do echo Hello from the DaemonSet; sleep 10; done" ]
+

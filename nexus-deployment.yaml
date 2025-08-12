@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nexus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nexus
+  template:
+    metadata:
+      labels:
+        app: nexus
+    spec:
+      containers:
+        - name: nexus
+          image: sonatype/nexus3:latest
+          ports:
+            - containerPort: 8081  # Nexus UI
+            - containerPort: 5000  # Docker registry
+          volumeMounts:
+            - name: nexus-data
+              mountPath: /nexus-data
+          env:
+            - name: INSTALL4J_ADD_VM_PARAMS
+              value: "-Ddocker.port=5000"
+      volumes:
+        - name: nexus-data
+          emptyDir: {}  # Use PVC in production
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nexus-service
+spec:
+  selector:
+    app: nexus
+  type: NodePort
+  ports:
+    - name: nexus-ui
+      protocol: TCP
+      port: 8081
+      targetPort: 8081
+      nodePort: 30937
+    - name: docker-registry
+      protocol: TCP
+      port: 5000
+      targetPort: 5000
+      nodePort: 30578
+
